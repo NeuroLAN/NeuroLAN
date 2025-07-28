@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kayıt Ol - NeuroLAN</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='home.css') }}">
+</head>
+<body>
+  <header>
+    <div class="container header-flex">
+      <div class="logo-container">
+        <img src="{{ url_for('assets', path='logo/NeuroLAN_logo.png') }}" alt="NeuroLAN Logo" class="logo-img" height="32" />
+        <h1 class="logo-text">NeuroLAN</h1>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/features">Features</a></li>
+          <li><a href="/download">Download</a></li>
+          <li><a href="https://github.com/NeuroLAN/NeuroLAN">GitHub</a></li>
+          <li><a href="/signin">Sign In</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <section class="form-section">
+  <div class="container">
+    <h2>Sign Up</h2>
+
+    <p id="username-exists-warning" class="warning-message {% if username_exists == True %}visible{% endif %}">
+      This username is already in use.
+    </p>
+    <p id="email-exists-warning" class="warning-message {% if mail_exists == True %}visible{% endif %}">
+      This email is already in use.
+    </p>
+
+    <form method="post" action="/signup">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" required>
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+
+      <button type="submit">Sign Up</button>
+    </form>
+
+    <div class="form-footer">
+      <p>Already have an account? <a href="/signin">Sign in</a></p>
+    </div>
+  </div>
+  </section>
+
+  <footer>
+    <p>© 2025 NeuroLAN. Published under the <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank">GPL v3 license</a>.</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NeuroLAN - Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='home.css') }}" />
+</head>
+<body>
+  <header>
+    <div class="container header-flex">
+      <div class="logo-container">
+        <img src="{{ url_for('assets', path='logo/NeuroLAN_logo.png') }}" alt="NeuroLAN Logo" class="logo-img" height="42" />
+        <h1 class="logo-text">NeuroLAN</h1>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="features">Features</a></li>
+          <li><a href="download">Download</a></li>
+          <li><a href="https://github.com/NeuroLAN/NeuroLAN">GitHub</a></li>
+          <li><a href="signin">Sign In</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h2>Not just voice. <span>Connection, friendship.</span></h2>
+      <p>Chat, talk, and share with NeuroLAN. Enjoy an open source and free communication experience.</p>
+      <a href="https://github.com/NeuroLAN/NeuroLAN" class="cta">Project Page</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 NeuroLAN. Published under the <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank">GPL v3 license</a>.</p>
+  </footer>
+</body>
+</html>
