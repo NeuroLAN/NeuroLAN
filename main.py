@@ -67,16 +67,15 @@ async def signin_post(
 ):
     user = find_user(mail=email)
 
-    if user["password"] == password:
+    if user.password == password:
         return templates.TemplateResponse(
             name="me.html",
             context={"request": request}
         )
-    else:
-        return templates.TemplateResponse(
-            name="signin.html",
-            context={
-                "request": request,
-                "error": True
-            }
-        )
+    return templates.TemplateResponse(
+        name="signin.html",
+        context={
+            "request": request,
+            "error": True
+        }
+    )

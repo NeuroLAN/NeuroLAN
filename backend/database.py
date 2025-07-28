@@ -54,6 +54,9 @@ def create_user(username:str, mail: str, password: str):
 
 def find_user(username: str = None, mail: str = None):
     with Session(engine) as session:
+        if username and mail:
+            raise ValueError("Only one of username or mail should be provided.")
+
         if username is not None:
             statement = select(User).where(User.username == username)
             result = session.exec(statement)
@@ -65,3 +68,4 @@ def find_user(username: str = None, mail: str = None):
             result = session.exec(statement)
 
             return result.first()
+    
