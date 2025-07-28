@@ -204,7 +204,7 @@ form a {
   color: #ff4d4d;
   font-weight: bold;
   margin-bottom: 1em;
-  display: none; /* Varsayılan gizli */
+  display: none;
 }
 
 .warning-message.visible {
