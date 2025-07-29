@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, Response
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -15,26 +15,74 @@ app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
 templates = Jinja2Templates(directory="frontend/templates")
 
+
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
+async def home(
+    request: Request
+):
     return templates.TemplateResponse(
-        name="home.html", request=request
+        name="home.html",
+        context={
+            "request": request
+        }
     )
+
 
 @app.get("/signin", response_class=HTMLResponse)
-async def signin_get(request: Request):
+async def signin_get(
+    request: Request
+):
+    client_session_id = request.cookies.get("session_id")
+    client_user_id = request.cookies.get("user_id")
+
+    _is_session_id_active = is_session_id_active(client_session_id, client_user_id)
+
+    if _is_session_id_active:
+        print("Session ID correct.")
+        return templates.TemplateResponse(
+            name="you.html",
+            context={
+                "request": request
+            }
+        )
+
     return templates.TemplateResponse(
-        name="signin.html", request=request
+        name="signin.html",
+        context={
+            "request": request
+        }
     )
 
+
 @app.get("/signup", response_class=HTMLResponse)
-async def signup_get(request: Request):
+async def signup_get(
+    request: Request
+):
+    client_session_id = request.cookies.get("session_id")
+    client_user_id = request.cookies.get("user_id")
+
+    _is_session_id_active = is_session_id_active(client_session_id, client_user_id)
+
+    if _is_session_id_active:
+        print("Session ID correct.")
+        return templates.TemplateResponse(
+            name="you.html",
+            context={
+                "request": request
+            }
+        )
+
     return templates.TemplateResponse(
-        name="signup.html", request=request
+        name="signup.html",
+        context={
+            "request": request
+        }
     )
+
 
 @app.post("/signup")
 async def signup_post(
+    response: Response,
     request: Request,
     username: Annotated[str, Form()],
     email: Annotated[str, Form()],
@@ -52,15 +100,38 @@ async def signup_post(
             }
         )
 
-    if create_user(username, email, password):
-        return templates.TemplateResponse(
-            name="me.html",
+    created_user = create_user(username, email, password)
+
+    if created_user is not None:
+        session_id = generate_session_id(created_user["id"])
+
+        response = templates.TemplateResponse(
+            name="you.html",
             context={"request": request}
         )
+
+        response.set_cookie( # sets cookie for client.
+            key="session_id", # cookie's key for accessing later
+            value=session_id,  # cookie's value
+            httponly=True, # no javascript
+            samesite="Lax", 
+            max_age=60*60*24*30 # expiring in 1 month (in seconds)
+        )
+
+        response.set_cookie(
+            key="user_id",
+            value=created_user["id"],
+            httponly=True,
+            samesite="Lax",
+            max_age=86400000
+        )
+
+        return response
 
 
 @app.post("/signin")
 async def signin_post(
+    response: Response,
     request: Request,
     email: Annotated[str, Form()],
     password: Annotated[str, Form()]
@@ -68,14 +139,61 @@ async def signin_post(
     user = find_user(mail=email)
 
     if user.password == password:
-        return templates.TemplateResponse(
-            name="me.html",
+        session_id = generate_session_id(user.id)
+
+        response = templates.TemplateResponse(
+            name="you.html",
             context={"request": request}
         )
+
+        response.set_cookie( # sets cookie for client.
+            key="session_id", # cookie's key for accessing later
+            value=session_id,  # cookie's value
+            httponly=True, # no javascript
+            samesite="Lax", 
+            max_age=60*60*24*30 # expiring in 1 month (in seconds)
+        )
+
+        response.set_cookie(
+            key="user_id",
+            value=user.user_id,
+            httponly=True,
+            samesite="Lax",
+            max_age=86400000
+        )
+
+        return response
     return templates.TemplateResponse(
         name="signin.html",
         context={
             "request": request,
             "error": True
+        }
+    )
+
+
+@app.get("/you")
+async def you_page(
+    request: Request
+):
+    client_session_id = request.cookies.get("session_id")
+    client_user_id = request.cookies.get("user_id")
+
+    _is_session_id_active = is_session_id_active(client_session_id, client_user_id)
+
+    if _is_session_id_active:
+        print("Session ID correct.")
+    else:
+        return templates.TemplateResponse(
+            name="signin.html",
+            context={
+                "request": request
+            }
+        )
+
+    return templates.TemplateResponse(
+        name="you.html",
+        context={
+            "request": request
         }
     )
