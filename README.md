@@ -41,7 +41,8 @@ Planned:
 
 Thanks to:
 - Snek (Python) for being easy
-- [FastAPI](https://fastapi.tiangolo.com/) for its simplicity and speed  
+- [FastAPI](https://fastapi.tiangolo.com/) for its simplicity and speed
+- [SQLModel](https://sqlmodel.tiangolo.com/) for getting me familiar with database work
 - My brother, for trying *so hard* to come up with a name (he still failed though)
 
 ---
