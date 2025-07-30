@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import FastAPI, Request, Form, Response
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -85,6 +85,7 @@ async def signup_post(
     response: Response,
     request: Request,
     username: Annotated[str, Form()],
+    display_name: Annotated[str, Form()],
     email: Annotated[str, Form()],
     password: Annotated[str, Form()]
 ):
@@ -100,7 +101,7 @@ async def signup_post(
             }
         )
 
-    created_user = create_user(username, email, password)
+    created_user = create_user(username, display_name, email, password)
 
     if created_user is not None:
         session_id = generate_session_id(created_user["id"])
@@ -129,7 +130,7 @@ async def signup_post(
         return response
 
 
-@app.post("/signin")
+@app.post("/signin", response_class=RedirectResponse)
 async def signin_post(
     response: Response,
     request: Request,
@@ -141,10 +142,7 @@ async def signin_post(
     if user.password == password:
         session_id = generate_session_id(user.id)
 
-        response = templates.TemplateResponse(
-            name="you.html",
-            context={"request": request}
-        )
+        response = RedirectResponse("/you")
 
         response.set_cookie( # sets cookie for client.
             key="session_id", # cookie's key for accessing later
@@ -172,7 +170,7 @@ async def signin_post(
     )
 
 
-@app.get("/you")
+@app.get("/you", response_class=HTMLResponse)
 async def you_page(
     request: Request
 ):
@@ -191,9 +189,16 @@ async def you_page(
             }
         )
 
+    user_details: User = find_user(id=client_user_id)
+
+    print(user_details["display_name"])
+
     return templates.TemplateResponse(
         name="you.html",
         context={
-            "request": request
+            "request": request,
+            "user_id": user_details["id"],
+            "username": user_details["username"],
+            "display_name": user_details["display_name"]
         }
     )

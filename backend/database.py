@@ -37,8 +37,9 @@ def is_user_exists(mail: str, username: str = None):
         return existing_items
 
 
-def create_user(username:str, mail: str, password: str):
-    user: User = User()
+def create_user(username: str, display_name: str | None, mail: str, password: str):
+    ph = PasswordHasher()
+    user = User()
 
     with Session(engine) as session:
         while True:
@@ -47,41 +48,64 @@ def create_user(username:str, mail: str, password: str):
             if result is None:
                 break
 
+        user.username = username.lower()
+        user.display_name = display_name or user.username
+        user.mail = mail
+        user.password = ph.hash(password)
 
-    user.username = username
-    user.mail = mail
-    user.password = ph.hash(password)
-
-    try:
-        with Session(engine) as session:
+        try:
             session.add(user)
-
             session.commit()
+            return {
+                "id": user.id,
+                "username": user.username,
+                "display_name": user.display_name,
+                "email": user.mail
+            }
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
 
-            return {"id": user.id, "username": user.username, "email": user.mail}
-            # in dictionary because when returning SQLTable type class variable its throws error because its not attached to a session
-    except Exception as e:
-        print(f"Error: {e}")
 
-        return None
+def find_user(username: str = None, mail: str = None, id: str = None):
+    parameters = [username, mail, id]
 
-
-def find_user(username: str = None, mail: str = None):
     with Session(engine) as session:
-        if username and mail:
-            raise ValueError("Only one of username or mail should be provided.")
+        if parameters.count(None) < 2:
+            raise ValueError("Only one of username or mail or id should be provided.")
 
         if username is not None:
             statement = select(User).where(User.username == username)
-            result = session.exec(statement)
+            user = session.exec(statement).first()
 
-            return result.first()
+            return {
+                "id": user.id,
+                "username": user.username,
+                "display_name": user.display_name,
+                "email": user.mail
+            }
 
         if mail is not None:
             statement = select(User).where(User.mail == mail)
-            result = session.exec(statement)
+            user = session.exec(statement).first()
 
-            return result.first()
+            return {
+                "id": user.id,
+                "username": user.username,
+                "display_name": user.display_name,
+                "email": user.mail
+            }
+
+        if id is not None:
+            statement = select(User).where(User.id == id)
+            user = session.exec(statement).first()
+
+            return {
+                "id": user.id,
+                "username": user.username,
+                "display_name": user.display_name,
+                "email": user.mail
+            }
     
 
 def generate_session_id(user_id: str):
@@ -107,7 +131,7 @@ def generate_session_id(user_id: str):
 def is_session_id_active(client_session_id: str, user_id: str):
     if client_session_id is None or user_id is None:
             return False
-            
+
     with Session(engine) as session:
         statement = select(SessionID).where(SessionID.id == user_id, SessionID.session_id == client_session_id)
         filtered_session_id = session.exec(statement).first()
