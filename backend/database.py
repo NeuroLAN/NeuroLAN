@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 
 from backend.models import *
 
+ph = PasswordHasher()
+
 sqlite_file_name = ".db/NeuroLAN.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
@@ -39,15 +41,12 @@ def create_user(username:str, mail: str, password: str):
     user: User = User()
 
     with Session(engine) as session:
-        while (True):
+        while True:
             user.id = str(uuid.uuid4())
-
-            if session.exec(select(User).where(User.id == user.id)) is None:
-                user.id = str(uuid.uuid4())
-            else:
+            result = session.exec(select(User).where(User.id == user.id)).first()
+            if result is None:
                 break
 
-    ph = PasswordHasher()
 
     user.username = username
     user.mail = mail
@@ -106,14 +105,14 @@ def generate_session_id(user_id: str):
 
 
 def is_session_id_active(client_session_id: str, user_id: str):
+    if client_session_id is None or user_id is None:
+            return False
+            
     with Session(engine) as session:
         statement = select(SessionID).where(SessionID.id == user_id, SessionID.session_id == client_session_id)
         filtered_session_id = session.exec(statement).first()
 
         if filtered_session_id is None:
-            return False
-
-        if client_session_id is None or user_id is None:
             return False
 
         if filtered_session_id.session_id == client_session_id:
