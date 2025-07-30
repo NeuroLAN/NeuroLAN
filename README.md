@@ -2,6 +2,12 @@
 
 > _(Not) a Discord alternative._
 
+## ⚠️ DEVELOPMENT STOPPED TEMPORARILY ⚠️
+
+**Please read _[this commit](https://github.com/JusticeOfEternity/NeuroLAN/commit/f176d00580e6462d29e2c4068b3ec06802ff2ef5)_ details.**
+
+---
+
 **NeuroLAN** is an open-source messaging and voice-chat platform — or at least, it aims to be.
 
 ---
